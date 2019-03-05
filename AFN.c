@@ -166,7 +166,7 @@ Automate concatenation_automate ( Automate a , Automate b )
 {
 	Automate res;
 	int count=0;
-	Transition *tmp; //stocke les etats de b pour lequels il faut relier les états finaux de a avec des transitions
+	Transition *tmp; //stocke les transition de b pour lequels il faut remplacer l'etat initial de b par les etats terminaux de a
 	res.Tetat=a.Tetat+b.Tetat-1;
 	res.Tsortie=b.Tsortie;	
 	b=renommage_etat(b,a.Tetat-1);
@@ -222,5 +222,47 @@ Automate concatenation_automate ( Automate a , Automate b )
 		}
 	}
 	res.entre=a.entre;
+	return res;
+}
+
+Automate kleen ( Automate a )
+{
+	Automate res;
+	int count = 0 ;
+	Transition *tmp;
+	res=a;
+	
+	for (int i = 0 ; i < a.Ttransition ; i++ )  
+	{
+		if ( a.transition[i].src == a.entre )
+			count++;
+	}
+
+	tmp = malloc(count*sizeof(Transition));
+	for (int i = 0 ; i < a.Ttransition ; i++ )  
+	{
+		if ( a.transition[i].src == a.entre )
+			tmp[i]=a.transition[i];
+	}
+	
+	int k=res.Ttransition;
+	res.Ttransition+=count*res.Tsortie;
+	affichage(a);
+	res.transition=malloc(res.Ttransition*sizeof(Transition));
+	
+	for( int i = 0 ; i < k ; i++)
+	{
+		res.transition[i]=a.transition[i];
+	}
+	
+	for ( int i = 0 ; i < a.Tsortie ; i++ )
+	{
+		for (int j = 0 ; j < count ; j++ )
+		{
+			res.transition[k+i*count+j]=tmp[j];
+			res.transition[k+i*count+j].src=a.sortie[i];
+		}
+	}
+	
 	return res;
 }

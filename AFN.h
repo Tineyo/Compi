@@ -29,4 +29,5 @@ Automate build_mot(char mot);
 Automate renommage_etat( Automate a , int inc );
 Automate union_automate( Automate a  , Automate b );
 Automate concatenation_automate( Automate a  , Automate b );
+Automate kleen ( Automate a );
 #endif
