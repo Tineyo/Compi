@@ -3,22 +3,26 @@
 void affichage (Automate A1)
 {
 	printf("\nA1.entre = %d \n",A1.entre);		// on affiche l automate deterministe minimise
-	printf("\nLa liste des etats : \n");
+	
+	printf("\nLa liste des %d etats : \n",A1.Tetat);
 	for(int i=0;i<A1.Tetat;i++)
 	{
 		printf("A1.etat[%d] = %d \n",i,A1.etat[i]);
 	}
-	/*printf("\nLa liste des caracteres : \n");
+	
+	printf("\nLa liste des %d caracteres : \n",A1.Talphabet);
 	for(int i=0;i<A1.Talphabet;i++)
 	{
 		printf("A1.alphabet[%d] = %c \n",i,A1.alphabet[i]);
-	}*/
-	printf("\nLa liste des sorties : \n");
+	}
+	
+	printf("\nLa liste des %d sorties : \n",A1.Tsortie);
 	for(int i=0;i<A1.Tsortie;i++)
 	{
 		printf("A1.sortie[%d] = %d \n",i,A1.sortie[i]);
 	}
-	printf("\nLa liste des transistions : \n");
+	
+	printf("\nLa liste des %d transitions : \n",A1.Ttransition);
 	for(int i=0;i<A1.Ttransition;i++)
 	{
 		printf("transition de %d avec %c vers %d \n",A1.transition[i].src,A1.transition[i].alpha,A1.transition[i].dest);
@@ -140,14 +144,14 @@ Automate union_automate( Automate a  , Automate b )
 	for ( int i = 0 ; i < a.Ttransition ; i++ )
 	{
 		res.transition[i]=a.transition[i];
-		if ( res.transition[i].src = a.entre )
+		if ( res.transition[i].src == a.entre )
 			res.transition[i].src = 0;
 	}
 
 	for ( int i = 0 ; i < b.Ttransition ; i++ )
 	{
 		res.transition[i+a.Ttransition]=b.transition[i];
-		if ( res.transition[i+a.Ttransition].src = b.entre )
+		if ( res.transition[i+a.Ttransition].src == b.entre )
 			res.transition[i+a.Ttransition].src = 0;
 	}
 	
