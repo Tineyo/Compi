@@ -119,7 +119,7 @@ Automate union_automate( Automate a  , Automate b )
 	res.Ttransition=a.Ttransition+b.Ttransition;
 	res.Tsortie=a.Tsortie+b.Tsortie;
 	//res.Talphabet;
-	b=renommage_etat(b,a.Tetat);
+	b=renommage_etat(b,a.Tetat-1);
 	res.etat=malloc(res.Tetat*sizeof(int));
 	res.transition=malloc(res.Tetat*sizeof(Transition));
 	res.sortie=malloc(res.Tsortie*sizeof(int));
@@ -140,14 +140,14 @@ Automate union_automate( Automate a  , Automate b )
 	for ( int i = 0 ; i < a.Ttransition ; i++ )
 	{
 		res.transition[i]=a.transition[i];
-		if ( res.transition[i].src = a.entre )
+		if ( res.transition[i].src == a.entre )
 			res.transition[i].src = 0;
 	}
 
 	for ( int i = 0 ; i < b.Ttransition ; i++ )
 	{
 		res.transition[i+a.Ttransition]=b.transition[i];
-		if ( res.transition[i+a.Ttransition].src = b.entre )
+		if ( res.transition[i+a.Ttransition].src == b.entre )
 			res.transition[i+a.Ttransition].src = 0;
 	}
 	
@@ -162,3 +162,65 @@ Automate union_automate( Automate a  , Automate b )
 	return res;
 }
 
+Automate concatenation_automate ( Automate a , Automate b )
+{
+	Automate res;
+	int count=0;
+	Transition *tmp; //stocke les etats de b pour lequels il faut relier les états finaux de a avec des transitions
+	res.Tetat=a.Tetat+b.Tetat-1;
+	res.Tsortie=b.Tsortie;	
+	b=renommage_etat(b,a.Tetat-1);
+	//On compte le nombre transition sortant de l'état initial du second automate pour calculer le nombre total de transition après concaténation
+	for (int i = 0 ; i < b.Ttransition ; i++ )  
+	{
+		if ( b.transition[i].src == b.entre )
+			count++;
+	}
+	tmp = malloc(count*sizeof(Transition));
+	for (int i = 0 ; i < b.Ttransition ; i++ )  
+	{
+		if ( b.transition[i].src == b.entre )
+			tmp[i]=b.transition[i];
+	}
+	res.Ttransition=a.Ttransition+a.Tsortie*count-count+b.Ttransition;
+	res.etat=malloc(res.Tetat*sizeof(int));
+	res.transition=malloc(res.Tetat*sizeof(Transition));
+	res.sortie=malloc(res.Tsortie*sizeof(int));
+
+	for ( int i = 0  ; i < a.Tetat ; i++ )
+	{
+		res.etat[i]=a.etat[i];		
+	}
+		
+	for ( int i = 1 ; i < b.Tetat ; i++ )
+	{
+		res.etat[i+a.Tetat-1]=b.etat[i];
+	}
+
+	for ( int i = 0 ; i < b.Tsortie ; i ++ )
+	{
+		res.sortie[i] = b.sortie[i];
+	}
+	
+	for ( int i = 0 ; i < a.Ttransition ; i++ )
+	{
+		res.transition[i] = a.transition[i];
+	}
+	for ( int i = 0 ; i < b.Ttransition ; i++ )
+	{
+		if ( b.transition[i].dest != b.entre )
+			res.transition[i+a.Ttransition]=b.transition[i];
+	}
+	
+	int k=a.Ttransition+b.Ttransition-count;
+	for ( int i = 0 ; i < a.Tsortie ; i++ )
+	{
+		for (int j = 0 ; j < count ; j++ )
+		{
+			res.transition[k+i*count+j]=tmp[j];
+			res.transition[k+i*count+j].src=a.sortie[i];
+		}
+	}
+	res.entre=a.entre;
+	return res;
+}
