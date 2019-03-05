@@ -123,7 +123,7 @@ Automate union_automate( Automate a  , Automate b )
 	res.Ttransition=a.Ttransition+b.Ttransition;
 	res.Tsortie=a.Tsortie+b.Tsortie;
 	//res.Talphabet;
-	b=renommage_etat(b,a.Tetat);
+	b=renommage_etat(b,a.Tetat-1);
 	res.etat=malloc(res.Tetat*sizeof(int));
 	res.transition=malloc(res.Tetat*sizeof(Transition));
 	res.sortie=malloc(res.Tsortie*sizeof(int));
@@ -166,3 +166,107 @@ Automate union_automate( Automate a  , Automate b )
 	return res;
 }
 
+Automate concatenation_automate ( Automate a , Automate b )
+{
+	Automate res;
+	int count=0;
+	Transition *tmp; //stocke les transition de b pour lequels il faut remplacer l'etat initial de b par les etats terminaux de a
+	res.Tetat=a.Tetat+b.Tetat-1;
+	res.Tsortie=b.Tsortie;	
+	b=renommage_etat(b,a.Tetat-1);
+	//On compte le nombre transition sortant de l'état initial du second automate pour calculer le nombre total de transition après concaténation
+	for (int i = 0 ; i < b.Ttransition ; i++ )  
+	{
+		if ( b.transition[i].src == b.entre )
+			count++;
+	}
+	tmp = malloc(count*sizeof(Transition));
+	for (int i = 0 ; i < b.Ttransition ; i++ )  
+	{
+		if ( b.transition[i].src == b.entre )
+			tmp[i]=b.transition[i];
+	}
+	res.Ttransition=a.Ttransition+a.Tsortie*count-count+b.Ttransition;
+	res.etat=malloc(res.Tetat*sizeof(int));
+	res.transition=malloc(res.Tetat*sizeof(Transition));
+	res.sortie=malloc(res.Tsortie*sizeof(int));
+
+	for ( int i = 0  ; i < a.Tetat ; i++ )
+	{
+		res.etat[i]=a.etat[i];		
+	}
+		
+	for ( int i = 1 ; i < b.Tetat ; i++ )
+	{
+		res.etat[i+a.Tetat-1]=b.etat[i];
+	}
+
+	for ( int i = 0 ; i < b.Tsortie ; i ++ )
+	{
+		res.sortie[i] = b.sortie[i];
+	}
+	
+	for ( int i = 0 ; i < a.Ttransition ; i++ )
+	{
+		res.transition[i] = a.transition[i];
+	}
+	for ( int i = 0 ; i < b.Ttransition ; i++ )
+	{
+		if ( b.transition[i].dest != b.entre )
+			res.transition[i+a.Ttransition]=b.transition[i];
+	}
+	
+	int k=a.Ttransition+b.Ttransition-count;
+	for ( int i = 0 ; i < a.Tsortie ; i++ )
+	{
+		for (int j = 0 ; j < count ; j++ )
+		{
+			res.transition[k+i*count+j]=tmp[j];
+			res.transition[k+i*count+j].src=a.sortie[i];
+		}
+	}
+	res.entre=a.entre;
+	return res;
+}
+
+Automate kleen ( Automate a )
+{
+	Automate res;
+	int count = 0 ;
+	Transition *tmp;
+	res=a;
+	
+	for (int i = 0 ; i < a.Ttransition ; i++ )  
+	{
+		if ( a.transition[i].src == a.entre )
+			count++;
+	}
+
+	tmp = malloc(count*sizeof(Transition));
+	for (int i = 0 ; i < a.Ttransition ; i++ )  
+	{
+		if ( a.transition[i].src == a.entre )
+			tmp[i]=a.transition[i];
+	}
+	
+	int k=res.Ttransition;
+	res.Ttransition+=count*res.Tsortie;
+	affichage(a);
+	res.transition=malloc(res.Ttransition*sizeof(Transition));
+	
+	for( int i = 0 ; i < k ; i++)
+	{
+		res.transition[i]=a.transition[i];
+	}
+	
+	for ( int i = 0 ; i < a.Tsortie ; i++ )
+	{
+		for (int j = 0 ; j < count ; j++ )
+		{
+			res.transition[k+i*count+j]=tmp[j];
+			res.transition[k+i*count+j].src=a.sortie[i];
+		}
+	}
+	
+	return res;
+}
