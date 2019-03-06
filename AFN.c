@@ -319,5 +319,14 @@ Automate kleen ( Automate a )
 		}
 	}
 	
+	//Ajout de l'état initial comme terminal
+	res.Tsortie++;
+	res.sortie=malloc(res.Tsortie*sizeof(int));
+	res.sortie[0]=0;	
+	for ( int i = 0 ; i < res.Tsortie-1 ; i++ )
+		res.sortie[i+1]=a.sortie[i];
+	
+	
+	
 	return res;
 }
