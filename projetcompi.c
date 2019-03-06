@@ -3,6 +3,46 @@
 
 #include "AFN.c"
 
+void execution(struct Automate A1, char* mot)
+{
+	int etatactuel=A1.entre;
+	printf("\nTest du mot %s \n\n",mot);
+	
+	for(int i=0; i<sizeof(mot);i++)		//on lits toutes les lettres du mots
+	{
+		for(int k=0; k<A1.Ttransition;k++)	//on cherche la transition qui part de l etat actuel et qui consomme le caractere demande
+		{
+			if((A1.transition[k].src==etatactuel)&&(A1.transition[k].alpha==mot[i]))
+			{
+				printf("Etat actuel = %d avec %c comme caractère actuel \n",etatactuel,mot[i]);
+				etatactuel=A1.transition[k].dest;
+				k=A1.Ttransition;
+			}	
+		}
+	}
+	
+	printf("Etat final = %d avec le(s) etat(s) de sortie(s) qui est(sont) : ",etatactuel);
+	for(int i=0; i<A1.Tsortie;i++)
+	{
+		printf("%d  ",A1.sortie[i]);
+	}
+	
+	int test=0;
+	for(int i=0; i<A1.Tsortie;i++)
+	{
+		if(etatactuel==A1.sortie[i])
+		{
+			printf("\nIl est possible d executer ce mot avec cet AFD car %d est un état accepteur.\n",A1.sortie[i]);
+			test=1;
+		}
+	}
+	if(test==0)
+	{
+		printf("\nIl est impossible d executer ce mot avec cet AFD car l'etat final ne correspond pas à un des états accepteurs.\n");
+	}
+	return;
+}
+
 struct Automate determiniser(struct Automate A1)
 {
 	int Taille=A1.Tetat*5;		//la taille du tableau depend du nombre d etats de base
@@ -581,7 +621,10 @@ int main(int argc, char *argv[])
 	A1=minimiser(A1);	//on demande une minimisation de l automate
 	affichage(A1);
 	
+	char mot[]={'a','a','a','b'};
+	//char mot[]={'a'};
 	
+	execution(A1,mot);
 	
 	return 0;
 }
