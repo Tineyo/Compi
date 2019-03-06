@@ -2,7 +2,7 @@
 
 void affichage (Automate A1)
 {
-	printf("\nA1.entre = %d \n",A1.entre);		// on affiche l automate deterministe minimise
+	printf("\nA1.entre = %d \n",A1.entre);// on affiche l automate deterministe minimise
 	
 	printf("\nLa liste des %d etats : \n",A1.Tetat);
 	for(int i=0;i<A1.Tetat;i++)
@@ -53,14 +53,15 @@ Automate build_mot_vide()
 	Automate a;
 	a.etat=malloc(sizeof(int));
 	a.sortie=malloc(sizeof(int));
-
+	a.alphabet=malloc(sizeof(int));
+	
 	a.Tetat=1;
 	a.Ttransition=0;
 	a.Tsortie=1;
-	a.Talphabet=0;	
+	a.Talphabet=1;	
 
 	a.etat[0]=0;
-	a.alphabet=NULL;
+	a.alphabet[0]='\\';
 	a.entre=0;
 	a.sortie[0]=0;
 
