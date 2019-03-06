@@ -67,6 +67,8 @@ Automate build_mot_vide()
 	return a;
 }
 
+
+
 Automate build_mot(char mot)
 {
 	Automate a;
@@ -116,18 +118,49 @@ Automate renommage_etat ( Automate a , int inc )
 	return a;
 }
 
+void retirer_doublon ( char *str )
+{
+	int tab[256]={0};
+	int index1=0 , index2=0;
+	char temp;
+	while ( str[index1] )
+	{
+		temp = str[index1];
+		if(tab[temp]==0)
+		{
+			tab[temp]=1;
+			str[index2]=str[index1];
+			index2++;	
+		}
+		index1++;
+	}
+	str[index2]='\0';
+}
+
 Automate union_automate( Automate a  , Automate b ) 
 {
 	Automate res;
+	char *str;
+	str=malloc((a.Talphabet+b.Talphabet)*sizeof(char));
+	
+	strcpy(str,a.alphabet);
+	strcat(str,b.alphabet);
+	retirer_doublon(str);	
+
+	res.Talphabet=strlen(str);
 	res.Tetat=a.Tetat+b.Tetat-1;
 	res.Ttransition=a.Ttransition+b.Ttransition;
 	res.Tsortie=a.Tsortie+b.Tsortie;
-	//res.Talphabet;
+
+
 	b=renommage_etat(b,a.Tetat-1);
 	res.etat=malloc(res.Tetat*sizeof(int));
 	res.transition=malloc(res.Tetat*sizeof(Transition));
 	res.sortie=malloc(res.Tsortie*sizeof(int));
+	res.alphabet=malloc(res.Talphabet*sizeof(char));	
 
+	strcpy(res.alphabet,str);
+	
 	res.etat[0]=0;
 	res.entre=0;
 	
@@ -171,8 +204,20 @@ Automate concatenation_automate ( Automate a , Automate b )
 	Automate res;
 	int count=0;
 	Transition *tmp; //stocke les transition de b pour lequels il faut remplacer l'etat initial de b par les etats terminaux de a
+	char *str;
+	
+	str=malloc((a.Talphabet+b.Talphabet)*sizeof(char));
+	
+	strcpy(str,a.alphabet);
+	strcat(str,b.alphabet);
+	retirer_doublon(str);
+
+	res.Talphabet=strlen(str);
+	res.Tetat=a.Tetat+b.Tetat-1;
 	res.Tetat=a.Tetat+b.Tetat-1;
 	res.Tsortie=b.Tsortie;	
+
+	
 	b=renommage_etat(b,a.Tetat-1);
 	//On compte le nombre transition sortant de l'état initial du second automate pour calculer le nombre total de transition après concaténation
 	for (int i = 0 ; i < b.Ttransition ; i++ )  
@@ -186,11 +231,17 @@ Automate concatenation_automate ( Automate a , Automate b )
 		if ( b.transition[i].src == b.entre )
 			tmp[i]=b.transition[i];
 	}
+
 	res.Ttransition=a.Ttransition+a.Tsortie*count-count+b.Ttransition;
+	
+	res.alphabet=malloc(res.Talphabet*sizeof(char));
 	res.etat=malloc(res.Tetat*sizeof(int));
 	res.transition=malloc(res.Tetat*sizeof(Transition));
 	res.sortie=malloc(res.Tsortie*sizeof(int));
-
+	
+	strcpy(res.alphabet,str);
+	
+	
 	for ( int i = 0  ; i < a.Tetat ; i++ )
 	{
 		res.etat[i]=a.etat[i];		
@@ -251,7 +302,6 @@ Automate kleen ( Automate a )
 	
 	int k=res.Ttransition;
 	res.Ttransition+=count*res.Tsortie;
-	affichage(a);
 	res.transition=malloc(res.Ttransition*sizeof(Transition));
 	
 	for( int i = 0 ; i < k ; i++)
