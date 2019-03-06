@@ -3,7 +3,6 @@
 
 #include "AFN.c"
 
-
 struct Automate determiniser(struct Automate A1)
 {
 	int Taille=A1.Tetat*5;		//la taille du tableau depend du nombre d etats de base
@@ -306,7 +305,219 @@ struct Automate determiniser(struct Automate A1)
 	return A1;
 }
 
+struct Automate minimiser(struct Automate A1)
+{
+	//technique de minimisation fait en td en partant d un automate deterministe généré depuis la fonction determinisation
+	int test,boucle=0,inc;
+	int tab[A1.Talphabet+1][A1.Tetat];		//tab va contenir les valeurs de l analyse de la minimisation
+	int tab2[A1.Tetat];		//tab2 va permettre de tester si l automate generer pas tab est minimiser entierement ou non
+	
+	printf("\nMinimisation de l automate\n");
+	
+	for(int a=0;a<A1.Tetat;a++)		//initialisation on regarde qui est un etat acceptant ou non =0 si non et =1 si oui
+	{
+		test=0;
+		for(int b=0;b<A1.Tsortie;b++)
+		{
+			if(A1.etat[a]==A1.sortie[b])
+			{
+				test=1;
+			}
+		}
+		if(test==1)
+		{
+			tab[0][a]=1;
+		}
+		else
+		{
+			tab[0][a]=0;
+		}
+	}
+	
+	while(boucle==0)		//on fais forcement au moins un tour de boucle
+	{		// si tab[0] = tab2 alors on a la version la plus minimaliste
+		inc=0;		//chaque etat a nb alphabet transition 
+		for(int j=0;j<A1.Tetat;j++)
+		{
+			for(int i=1;i<A1.Talphabet+1;i++)
+			{
+			//depuis tab[0] et A1.transition on en deduit depuis chaque case qui correspond a un etat et un caractere ou on arrive
+				tab[i][j]=tab[0][A1.transition[inc].dest-1];
+				inc++;
+			}
+		}
+		
+		tab2[0]=1;	//le premier etat de tab2 = 1
+		inc=1;		// la valeur ascii de 0
+		for(int j=1;j<A1.Tetat;j++)
+		{
+			for(int k=0;k<j;k++)	//on test chaque colonne de tab avec celle deja vu pour obtenir le nombre de colonnes differentes
+			{
+				test=-2;	//pas d erreur
+				for(int i=0;i<A1.Talphabet+1;i++)
+				{
+					if((tab[i][j]!=tab[i][k])&&(test<0))
+					{
+						test=-1;	//si une difference alors nouvel etat
+					}
+				}
+				if(test==-2)		// si a la fin d une comparaison pas de differences alors etat deja etudie
+				{
+					test=tab2[k];		// on enregistre le fait que cette colonne existe deja et inutile de comparer avec les suivantes
+					break;
+				}
+			}
+			if(test>0)		// a la fin si test>0 ( valeur ascii d un etat) alors etat deja existant
+			{
+				tab2[j]=test;
+			}
+			else 		// si non alors nouvel etat on prend la valeur max des etats existants +1
+			{
+				inc++;
+				tab2[j]=inc;
+			}
+		}
+		
+		printf("\ntab\n  ");		//affichage de tab obtenu
+		for(int k=0;k<A1.Tetat;k++)
+		{
+			printf("%d ",A1.etat[k]);
+		}
+		printf("\n");
+		for(int i=0;i<A1.Talphabet+1;i++)
+		{
+			if(i==0)
+			{
+				printf("E ");
+			}else
+			{
+				printf("%c ",A1.alphabet[i-1]);
+			}
+			for(int j=0;j<A1.Tetat;j++)
+			{
+				printf("%d ",tab[i][j]);
+			}
+			printf("\n");
+		}
+		
+		printf("\ntab2\n  ");		//affichage de tab2 obtenu
+		for(int i=0;i<A1.Tetat;i++)
+		{
+			printf("%d ",tab2[i]);
+		}
+		printf("\n");
+	
+		for(int j=0;j<A1.Tetat;j++)		//on test si tab[0] = tab2
+		{
+			if(tab[0][j]!=tab2[j])	//si non on refais un tour sur while car on peut encore minimiser
+			{
+				boucle=-1;
+			}
+		}
+		
+		if(boucle==-1)
+		{
+			for(int j=0;j<A1.Tetat;j++)		//on va encore minimiser donc on prend la valeur de tab2
+			{
+				tab[0][j]=tab2[j];
+			}
+			boucle=0;
+		}
+		else
+		{
+			boucle=1;		//on a obtenu la version la plus minimaliste on arrete
+		}
+	}
+	
+	printf("\ntab minimiser\n  ");		//on affiche le tab le plus minimaliste
+	for(int k=0;k<A1.Tetat;k++)
+	{
+		printf("%d ",A1.etat[k]);
+	}
+	printf("\n");
+	for(int i=0;i<A1.Talphabet+1;i++)
+	{
+		if(i==0)
+		{
+			printf("E ");
+		}else
+		{
+			printf("%c ",A1.alphabet[i-1]);
+		}
+		for(int j=0;j<A1.Tetat;j++)
+		{
+			printf("%d ",tab[i][j]);
+		}
+		printf("\n");
+	}
+	
+	//on genere l automate depuis cette table
+	A1.entre=tab[0][A1.entre-1];
+	
+	int incsortie=0;		//on calcul le nombre d etat de sortie différents et on note les etats de sorties differents
+	if(A1.Tsortie!=0)
+	{
+		tab2[0]=tab[0][A1.sortie[0]-1];		// on re utilise tab2 car anciennes valeurs inutiles et on enregistre les nouvelles sorties
+		test=0;
+		incsortie++;
+		for(int a=1;a<A1.Tsortie;a++)
+		{
+			for(int b=0;b<a;b++)
+			{
+				if(tab[0][A1.sortie[a]-1]==tab[0][A1.sortie[b]-1])
+				{
+					test=-1;
+				}
+			}
+			if(test==0)
+			{
+				tab2[incsortie]=tab[0][A1.sortie[a]-1];
+				incsortie++;
+			}
+		}
+	}
+	
+	free(A1.transition);
+	free(A1.etat);
+	free(A1.sortie);
+	
+	A1.Tetat=inc;
+	A1.Tsortie=incsortie;
+	
+	A1.etat=malloc(A1.Tetat*sizeof(int));
+	A1.sortie=malloc(A1.Tsortie*sizeof(int));
+	A1.Ttransition=(A1.Tetat)*(A1.Talphabet);
+	A1.transition=malloc(A1.Ttransition*sizeof(Transition));
 
+	for(int i=0;i<A1.Tetat;i++)	// les etats sont notes par ordre croissant
+	{
+		A1.etat[i]=i+1;
+	}
+	
+	//initialisé A1.sortie
+	for(int i=0;i<A1.Tsortie;i++)		//les sorties sont enregistres dans tab2
+	{
+		A1.sortie[i]=tab2[i];
+	}
+	
+	inc=0;		//compte le nombre de case lu dans tab
+	test=1;		//compte le numero de l etat et la colonne de tab
+	for(int i=0;i<sizeof(tab2)/sizeof(tab2[0]);i++)
+	{
+		if(tab[0][i]==test)
+		{
+			for(int j=0;j<A1.Talphabet;j++)
+			{
+				A1.transition[inc].src=A1.etat[test-1];
+				A1.transition[inc].alpha=A1.alphabet[j];
+				A1.transition[inc].dest=tab[j+1][i];
+				inc++;
+			}
+			test++;
+		}
+	}
+	return A1;		//on return l automate minimiser
+}
 
 struct Automate creation()
 {
@@ -325,7 +536,7 @@ struct Automate creation()
 	
 	A1.etat=malloc(A1.Tetat*sizeof(int));
 	A1.alphabet=malloc(A1.Talphabet*sizeof(char));
-	A1.sortie=malloc(A1.Tsortie*sizeof(char));
+	A1.sortie=malloc(A1.Tsortie*sizeof(int));
 	A1.transition=malloc(A1.Ttransition*sizeof(Transition));
 	
 	A1.entre=entre;
@@ -366,6 +577,11 @@ int main(int argc, char *argv[])
 	
 	A1=determiniser(A1);	//on demande une determinisation de l automate
 	affichage(A1);
+	
+	A1=minimiser(A1);	//on demande une minimisation de l automate
+	affichage(A1);
+	
+	
 	
 	return 0;
 }
