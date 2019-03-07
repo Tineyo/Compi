@@ -40,7 +40,7 @@ void affichage (struct Automate A1, int Tetat, int Talphabet, int Ttransition, i
 struct Automate determiniser(struct Automate A1, int *Tetat, int *Talphabet, int *Ttransition, int *Tsortie)
 {
 	int Taille=*Tetat*5;		//la taille du tableau depend du nombre d etats de base
-	//tab va contenir les transitions entre les nouveaux etats  et x va marquer la fin d une colonne ou d une ligne
+	//tab va contenir les transitions entre les nouveaux etats et -1 va marquer la fin d une colonne ou d une ligne
 	char tab[Taille][*Talphabet+1];		//1 ere colonne: le nom des nouveaux etats, les colonnes suivantes sont les transitions depuis ce nouvel etat en utilisant 1 caractere de l'alphabet dans l'ordre
 	char tab2[Taille][*Tetat+2];	//tab2 va indiquer de quoi sont constituer les nouveaux etats, par rapports aux anciens
 	int inc=1;

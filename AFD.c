@@ -1,16 +1,17 @@
 #include "AFD.h"
 
-void execution(struct Automate A1, char* mot)
+void test_mot(struct Automate A1, char* mot)
 {
 	int etatactuel=A1.entre;
 	int k;
+	
 	printf("\nTest du mot %s \n",mot);
-	printf("Sur un automate supposé fini et deterministe avec comme caractères : ");
+	printf("Sur un automate supposé fini et déterministe avec comme caractères : ");
 	for(int i=0; i<A1.Talphabet;i++)
 	{
 		printf("%c  ",A1.alphabet[i]);
 	}
-	printf("\n");
+	printf("\nEtat de départ : %d \n",A1.entre);
 	
 	for(int i=0; i<strlen(mot);i++)		//on lits toutes les lettres du mots
 	{
@@ -18,12 +19,12 @@ void execution(struct Automate A1, char* mot)
 		{
 			if((A1.transition[k].src==etatactuel)&&(A1.transition[k].alpha==mot[i]))
 			{
-				printf("\nEtat actuel : %d avec %c comme caractère a consommé",etatactuel,mot[i]);
-				etatactuel=A1.transition[k].dest;
-				k=A1.Ttransition+2;
+				printf("\nEtat actuel : %d avec %c comme caractère a consommé et destination : %d",etatactuel,mot[i],A1.transition[k].dest);
+				etatactuel=A1.transition[k].dest;		//on modifie notre etat
+				k=A1.Ttransition+2;		//on a trouve la transition voulu on sort de la boucle
 			}	
 		}
-		if(k==A1.Ttransition)
+		if(k==A1.Ttransition)		//si on ne trouve pas de transition alors on ne peut pas executer ce mot
 		{
 			printf("\n\nDepuis l'état %d, on ne peut pas effectuer une transition en consommant %c : il est impossible d'exécuter %s sur cette automate.\n\n",etatactuel,mot[i],mot);
 			return;
@@ -47,7 +48,7 @@ void execution(struct Automate A1, char* mot)
 	}
 	if(test==0)
 	{
-		printf("\n\nIl est impossible d'exécuter ce mot avec cet AFD car l'etat final ne correspond pas à un des états accepteurs.\n\n");
+		printf("\n\nIl est impossible d'exécuter ce mot avec cet AFD car l'état final ne correspond pas à un des états accepteurs.\n\n");
 	}
 	return;
 }
@@ -104,7 +105,7 @@ struct Automate determiniser(struct Automate A1)
 	for(int a=0;a<A1.Tetat;a++)		//on cherche tous les Eclotures, l existance de transitions mot vide pour tous les anciens etats
 	{
 		inc=1;	//permet de se positionner dans le tableau Ecloture
-		for(int b=0;b<A1.Ttransition;b++)
+		for(int b=0;b<A1.Ttransition;b++)	//on lit toutes les transitions
 		{
 			//on regarde si l etat en question a une transition grace au mot vide
 			if((A1.transition[b].alpha=='\\')&&(A1.transition[b].src==Ecloture[a][0]))
@@ -116,7 +117,7 @@ struct Automate determiniser(struct Automate A1)
 		}
 	}
 	
-	tab[0][0]=1;		//initialisation des tableaux
+	tab[0][0]=1;		//initialisation des tableaux on considere que le premier etat sera 1 et les autres seront juste une incrementation
 	tab2[0][0]=tab[0][0];
 	tab2[0][1]=A1.entre;
 	tab2[1][0]=-1;	//indique la fin de l etat etudie
@@ -124,21 +125,19 @@ struct Automate determiniser(struct Automate A1)
 	
 	inc=2;
 	
-	//on verifie par rapport a Ecloture pour l entre si on dois prendre juste l etat d entre ou ceux toucher grace au mot vide
+	//on verifie par rapport a Ecloture pour l entre si on dois prendre juste l etat de depart ou ceux toucher grace au mot vide
 	for(int b=0;b<A1.Tetat;b++)	
 	{
 		if(A1.entre==Ecloture[b][0])
 		{
 			for(int z=1;Ecloture[b][z]!=-1;z++)	//on verifie par rapport a Ecloture
 			{
-				tab2[0][inc]=Ecloture[b][z];	//si l etat d entre va vers d autres etats grace au mot vide
+				tab2[0][inc]=Ecloture[b][z];	//si l etat de depart va vers d autres etats grace au mot vide
 				inc++;
 			}
 		}
 	}
 	tab2[0][inc]=-1;
-	
-	
 	
 	for(int i=0;i<Taille;i++)	//tous les nouveaux etats
 	{
@@ -229,7 +228,7 @@ struct Automate determiniser(struct Automate A1)
 			}
 			if(test>0)		//aucun etat equivalent donc creation nouvel etat
 			{
-				tab[i][a+1]=max;
+				tab[i][a+1]=max;	//le nom du nouvel etat vaux celui du precedent etat creee +1
 				tab2[nbetat][0]=max;
 				tab[nbetat][0]=max;
 				for(int x=1;tab3[x-1]!=-1;x++)
@@ -242,7 +241,7 @@ struct Automate determiniser(struct Automate A1)
 				tab[nbetat][0]=-1;
 			}	
 		}
-		if(tab[i+1][0]==-1)
+		if(tab[i+1][0]==-1)	//si pas de nouvel etat a analyser alors on a atteind la fin de l analyse
 		{
 			break;
 		}
@@ -254,6 +253,7 @@ struct Automate determiniser(struct Automate A1)
 		printf("%c ",A1.alphabet[a]);
 	}
 	printf("\n");
+	
 	for(int a=0;tab[a][0]!=-1;a++)
 	{
 		for(int b=0; b<A1.Talphabet+1;b++)
@@ -287,6 +287,7 @@ struct Automate determiniser(struct Automate A1)
 	//on genere l automate depuis cette table
 	A1.entre=1;
 	
+	//on cherche les nouveaux etats terminaux qu on enregistre dans tab3 car on a plus besoin des informations fournies par tab3
 	int incsortie=0;
 	for(int a=0;tab2[a][0]!=-1;a++)		//on regarde tous les nouveaux etats
 	{
@@ -314,14 +315,14 @@ struct Automate determiniser(struct Automate A1)
 		}
 	}
 	
-	free(A1.transition);
+	free(A1.transition);	//on libere tous les tableaux de l ancien automate
 	free(A1.etat);
 	free(A1.sortie);
 	
-	A1.Tetat=nbetat;
+	A1.Tetat=nbetat;		//nouvelles tailles
 	A1.Tsortie=incsortie;
 	
-	A1.etat=malloc(A1.Tetat*sizeof(int));
+	A1.etat=malloc(A1.Tetat*sizeof(int));		//on definie les nouvelles tailles
 	A1.sortie=malloc(A1.Tsortie*sizeof(int));
 	A1.Ttransition=(A1.Tetat)*(A1.Talphabet);
 	A1.transition=malloc(A1.Ttransition*sizeof(Transition));
@@ -332,7 +333,7 @@ struct Automate determiniser(struct Automate A1)
 	}
 	
 	//initialisé A1.sortie
-	for(int i=0;i<A1.Tsortie;i++)		//les sorties sont enregistres dans tab2
+	for(int i=0;i<A1.Tsortie;i++)		//les sorties sont enregistres dans tab3
 	{
 		A1.sortie[i]=tab3[i];
 	}
@@ -343,14 +344,15 @@ struct Automate determiniser(struct Automate A1)
 	{
 		for(int j=0;j<A1.Talphabet;j++)
 		{
-			A1.transition[inc].src=A1.etat[test];	//0 correspond a l etat de depart
-			A1.transition[inc].alpha=A1.alphabet[j];	//1 correspond au caractere consomme
-			A1.transition[inc].dest=tab[i][j+1];		//2 correspond a l arrive de l automate depuis 0 en prenant 1
+			//toutes les informations sont enregistrees dans tab
+			A1.transition[inc].src=A1.etat[test];
+			A1.transition[inc].alpha=A1.alphabet[j];
+			A1.transition[inc].dest=tab[i][j+1];
 			inc++;
 		}
 		test++;
 	}
-	
+	//nous avons maintenant une version deterministe de l automate de depart
 	return A1;
 }
 
@@ -363,7 +365,7 @@ struct Automate minimiser(struct Automate A1)
 	
 	printf("\nMinimisation de l automate\n");
 	
-	for(int a=0;a<A1.Tetat;a++)		//initialisation on regarde qui est un etat acceptant ou non =0 si non et =1 si oui
+	for(int a=0;a<A1.Tetat;a++)		//initialisation on regarde qui est un etat accepteur ou non =0 si non et =1 si oui
 	{
 		test=0;
 		for(int b=0;b<A1.Tsortie;b++)
@@ -384,13 +386,13 @@ struct Automate minimiser(struct Automate A1)
 	}
 	
 	while(boucle==0)		//on fais forcement au moins un tour de boucle
-	{		// si tab[0] = tab2 alors on a la version la plus minimaliste
+	{		// si les vecteurs tab[0] = tab2 alors on a la version la plus minimaliste
 		inc=0;		//chaque etat a nb alphabet transition 
 		for(int j=0;j<A1.Tetat;j++)
 		{
 			for(int i=1;i<A1.Talphabet+1;i++)
 			{
-			//depuis tab[0] et A1.transition on en deduit depuis chaque case qui correspond a un etat et un caractere ou on arrive
+			//depuis tab[0] et A1.transition on en deduit chaque case qui correspond a un etat et un caractere ou on arrive
 				tab[i][j]=tab[0][A1.transition[inc].dest-1];
 				inc++;
 			}
@@ -427,7 +429,7 @@ struct Automate minimiser(struct Automate A1)
 			}
 		}
 		
-		printf("\ntab\n  ");		//affichage de tab obtenu
+		printf("\ntab\n  ");		//affichage de tab obtenu sur ce tour de boucle
 		for(int k=0;k<A1.Tetat;k++)
 		{
 			printf("%d ",A1.etat[k]);
@@ -478,7 +480,7 @@ struct Automate minimiser(struct Automate A1)
 		}
 	}
 	
-	printf("\ntab minimiser\n  ");		//on affiche le tab le plus minimaliste
+	printf("\ntab minimiser\n  ");		//on affiche le tab generant l automate le plus minimaliste
 	for(int k=0;k<A1.Tetat;k++)
 	{
 		printf("%d ",A1.etat[k]);
@@ -579,7 +581,7 @@ struct Automate creation()
 	int transition[][3]={{1,0,2},{1,98,4},{2,97,2},{2,98,3},{4,97,4}};	// valeur ASCII du caractere consomme
 	
 	A1.Tetat=sizeof(etat)/sizeof(etat[0]);		// les tailles qui caracterisent l automate
-	A1.Talphabet=sizeof(alphabet);
+	A1.Talphabet=strlen(alphabet);
 	A1.Tsortie=sizeof(sortie)/sizeof(sortie[0]);
 	A1.Ttransition=sizeof(transition)/(3*sizeof(transition[0][0]));
 	

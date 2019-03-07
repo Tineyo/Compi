@@ -17,10 +17,10 @@ int main(int argc, char *argv[])
 	A1=minimiser(A1);	//on demande une minimisation de l automate
 	affichage(A1);
 	
-	char mot[]={'a','a','a','b'};
+	char mot[]={'b','a','a','b'};
 	//char mot[]={'a'};
 	
-	execution(A1,mot);
+	test_mot(A1,mot);
 	
 	return 0;
 }
