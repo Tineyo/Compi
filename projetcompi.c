@@ -22,5 +22,17 @@ int main(int argc, char *argv[])
 	
 	test_mot(A1,mot);
 	
+	/*Automate a,b,c;
+	a=build_mot('a');
+	a=kleen(a);
+	b=build_mot('b');
+	a=concatenation_automate(a,b);
+	c=build_mot('a');
+	c=kleen(c);
+	b=concatenation_automate(b,c);
+	a=union_automate(a,b);
+	affichage(a);
+	*/
+	
 	return 0;
 }
