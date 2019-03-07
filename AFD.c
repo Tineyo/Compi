@@ -1,5 +1,6 @@
 #include "AFD.h"
 
+
 void test_mot(struct Automate A1, char* mot)
 {
 	int etatactuel=A1.entre;
@@ -53,7 +54,7 @@ void test_mot(struct Automate A1, char* mot)
 	return;
 }
 
-struct Automate determiniser(struct Automate A1)
+Automate determiniser(struct Automate A1)
 {
 	int Taille=A1.Tetat*5;		//la taille du tableau depend du nombre d etats de base
 	
@@ -356,7 +357,7 @@ struct Automate determiniser(struct Automate A1)
 	return A1;
 }
 
-struct Automate minimiser(struct Automate A1)
+Automate minimiser(struct Automate A1)
 {
 	//technique de minimisation fait en td en partant d un automate deterministe généré depuis la fonction determinisation
 	int test,boucle=0,inc;
@@ -568,53 +569,4 @@ struct Automate minimiser(struct Automate A1)
 		}
 	}
 	return A1;		//on return l automate minimiser
-}
-
-struct Automate creation()
-{
-	Automate A1;
-	
-	int etat[]={1,2,3,4};
-	char alphabet[]={'a','b'};
-	int sortie[]={3,4};
-	int entre=1;
-	int transition[][3]={{1,0,2},{1,98,4},{2,97,2},{2,98,3},{4,97,4}};	// valeur ASCII du caractere consomme
-	
-	A1.Tetat=sizeof(etat)/sizeof(etat[0]);		// les tailles qui caracterisent l automate
-	A1.Talphabet=strlen(alphabet);
-	A1.Tsortie=sizeof(sortie)/sizeof(sortie[0]);
-	A1.Ttransition=sizeof(transition)/(3*sizeof(transition[0][0]));
-	
-	A1.etat=malloc(A1.Tetat*sizeof(int));
-	A1.alphabet=malloc(A1.Talphabet*sizeof(char));
-	A1.sortie=malloc(A1.Tsortie*sizeof(int));
-	A1.transition=malloc(A1.Ttransition*sizeof(Transition));
-	
-	A1.entre=entre;
-	for(int i=0;i<A1.Tetat;i++)
-	{
-		A1.etat[i]=etat[i];
-	}
-	for(int i=0;i<A1.Talphabet;i++)
-	{
-		A1.alphabet[i]=alphabet[i];
-	}
-	for(int i=0;i<A1.Tsortie;i++)
-	{
-		A1.sortie[i]=sortie[i];
-	}
-	for(int i=0;i<A1.Ttransition;i++)
-	{
-		A1.transition[i].src=transition[i][0];
-		if(transition[i][1]==0)
-		{
-			A1.transition[i].alpha='\\';
-		}else
-		{
-			A1.transition[i].alpha=transition[i][1];
-		}
-		A1.transition[i].dest=transition[i][2];
-	}
-	
-	return A1;
 }
