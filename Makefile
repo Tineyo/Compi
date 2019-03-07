@@ -11,4 +11,4 @@ AFD.o:	AFD.c
 	gcc -c AFD.c
 
 AFN.o:	AFN.c
-	gcc -c AFN.C
+	gcc -c AFN.c

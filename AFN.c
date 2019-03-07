@@ -2,7 +2,7 @@
 
 void affichage (Automate A1)
 {
-	printf("\nEtat initial = %d \n",A1.entre);
+	printf("\nEtat initial:\n%d",A1.entre);
 	
 	printf("\nLa liste des etats : \n");
 	for(int i=0;i<A1.Tetat;i++)
