@@ -17,10 +17,22 @@ int main(int argc, char *argv[])
 	A1=minimiser(A1);	//on demande une minimisation de l automate
 	affichage(A1);
 	
-	char mot[]={'a','a','a','b'};
+	char mot[]={'b','a','a','b'};
 	//char mot[]={'a'};
 	
-	execution(A1,mot);
+	test_mot(A1,mot);
+	
+	/*Automate a,b,c;
+	a=build_mot('a');
+	a=kleen(a);
+	b=build_mot('b');
+	a=concatenation_automate(a,b);
+	c=build_mot('a');
+	c=kleen(c);
+	b=concatenation_automate(b,c);
+	a=union_automate(a,b);
+	affichage(a);
+	*/
 	
 	return 0;
 }
